@@ -50,8 +50,11 @@
       height: 100%;
       cursor: text;
     }
+    
 
-    .editor-container .view-line{
+
+
+    .editor-container .view-line {
       line-height: 30px;
     }
     
@@ -67,8 +70,38 @@
       background-color: transparent;
       font-size: 20px;
     }
+    
+
+    .top-contorl{
+      position: absolute;
+      right:20px;
+    }
+    .top-contorl button{
+      color:aliceblue;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+    }
+
+    textarea {
+      position: absolute;
+      top:20px;
+      left:20px;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: aliceblue;
+      font-family: "Consolas"!important;
+      font-size: 30px;
+    }
+    
+    textarea:focus {
+      border: none;
+      box-shadow: none;
+      outline:none
+    }
   </style>
-  <script src="./build/main.bundle.js"></script>
 </head>
 
 <body>
@@ -78,17 +111,12 @@
     </div>
     <div class="editor-wrapper">
       <div class="editor-container">
-        <div class="presentation" role="presentation"></div>
-        <div id="" class="scroll-element editor-scrolltable">
-          <div class="view-line"><span>mov</span> <span>R1</span>,<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R2</span>1<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R3</span>,<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R4</span>,<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R5</span>,<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R6</span>,<span>#31</span></div>
-          <div class="view-line"><span>mov</span> <span>R7</span>,<span>#31</span></div>
+        <div class="top-contorl">
+          <button> 运行 </button>
         </div>
-        <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input>
+        <div class="presentation" role="presentation"></div>
+        <textarea wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
+        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
       </div>
     </div>
   </div>

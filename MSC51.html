@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>MSC51</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html,
+    body {
+      background: #282c34;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .app {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      min-width: 999px;
+      margin: 10px auto;
+    }
+    
+    .data-wrapper {
+      flex: 233px 0 0;
+      height: 100%;
+      background: #21252b;
+    }
+    
+    .editor-wrapper {
+      flex: 1;
+      height: 100%;
+      font-family: "Consolas"!important;
+      color: #ff0;
+    }
+    
+    .editor-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      cursor: text;
+    }
+    
+    .top-contorl {
+      position: absolute;
+      right: 20px;
+    }
+    
+    .top-contorl button {
+      color: aliceblue;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+    }
+    
+    textarea {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: aliceblue;
+      font-family: "Consolas"!important;
+      font-size: 30px;
+    }
+    
+    textarea:focus {
+      border: none;
+      box-shadow: none;
+      outline: none
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="data-wrapper"></div>
+    <div class="editor-wrapper">
+      <div class="editor-container">
+        <div class="top-contorl">
+          <button onclick="run()"> 运行 </button>
+        </div>
+        <textarea wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
+        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const log = console.log;
+
+    // const getValue = (program, s) => {
+    //   if (/@[R,A,B][0-7]\+/.test(s)) { //变址寻址
+    //   } else if (/@[R,A,B][0-7]/.test(s)) { //寄存器间接寻址
+    //     let address = program.workingRegistersGroup[program.RSG][parseInt(s.replace(/R/, ''), 16)].data;
+    //     let result = program.workingRegistersGroup[program.RSG][address.data].data;
+    //     console.log(result)
+    //   } else if (/[R,A,B][0-7]/.test(s)) { //寄存器寻址
+    //     let result = program.workingRegistersGroup[program.RSG][parseInt(s.replace(/R/, ''), 16)];
+    //     return result ? program.workingRegistersGroup[program.RSG][result.data].data : 0;
+    //   } else if (/^#[0-9-a-f-A-F]/.test(s)) { //立即数寻址
+    //     return parseInt(s.replace('#', ''), 16);
+    //   } else if (/[0-9-a-f-A-F]/.test(s)) { //直接寻址
+    //     let result = program.workingRegistersGroup[program.RSG].find(i => i.address === parseInt(s, 16))
+    //     return result ? result.data : 0
+    //   } else {}
+    // }
+  </script>
+  <script>
+    class ByteUnit {
+      constructor(address, data) {
+        this._address = address.toString(16);
+        this._data = data.toString(16);
+        Register.count++;
+      }
+      set address(val) {
+        if (val > 0xFF) {
+          this._address = `${val % 0XFF}`.toString(16);
+          return true;
+        } else if (val < 0x0) {
+          this._address = 0;
+        }
+        this._address = val.toString(16);
+      }
+      get address() {
+        return this._address.length == 2 ? this._address : '0' + this._address;
+      }
+      set data(val) {
+        if (val > 0xFF) {
+          this._data = `${val % 0xFF}`.toString(16);
+          return true;
+        } else if (val < 0x0) {
+          this._data = `${0xFF}`.toString(16);
+        }
+        this._data = val.toString(16);
+      }
+      get data() {
+        return this._data.length == 2 ? this._data : '0' + this._data;
+      }
+
+
+      getBit(n) {
+        if (n >= 0 && n < 8) {
+          return (parseInt(this._data, 16) >> n & 1) != 'undefined' ? (parseInt(this._data, 16) >> n & 1) : 0;
+        }
+      }
+
+      setBit(n, b) {
+        if (n >= 0 && n < 8) {
+          if (b === 0) {
+            this._data = parseInt(this._data, 16) & ~Math.pow(2, n);
+          } else {
+            this._data = parseInt(this._data, 16) ^ Math.pow(2, n);
+          }
+        }
+      }
+    }
+
+    class Register extends ByteUnit {
+      constructor(address, data, name) {
+        super(address, data);
+        this.name = name;
+      }
+    }
+
+    class SFR extends ByteUnit {
+      constructor(address, data, name) {
+        super(address, data);
+        this.name = name;
+      }
+    }
+
+    class PSW extends SFR {
+      constructor(address, data, name) {
+        super(address, data, name);
+      }
+
+      get XXOO() {
+        return 'XX00'
+      }
+
+      get P() {
+        return this.getBit(0)
+      }
+      get OV() {
+        return this.getBit(2)
+      }
+      get RS0() {
+        return this.getBit(3)
+      }
+      get RS1() {
+        return this.getBit(4)
+      }
+      get F0() {
+        return this.getBit(5)
+      }
+      get AC() {
+        return this.getBit(6)
+      }
+      get CY() {
+        return this.getBit(7)
+      }
+
+      set P(val) {
+        this.setBit(0, value > 0 ? 1 : 0)
+      }
+      set OV(val) {
+        this.setBit(2, value > 0 ? 1 : 0)
+      }
+      set RS0(val) {
+        this.setBit(3, value > 0 ? 1 : 0)
+      }
+      set RS1(val) {
+        this.setBit(4, value > 0 ? 1 : 0)
+      }
+      set F0(val) {
+        this.setBit(5, value > 0 ? 1 : 0)
+      }
+      set AC(val) {
+        this.setBit(6, value > 0 ? 1 : 0)
+      }
+      set CY(val) {
+        this.setBit(7, value > 0 ? 1 : 0)
+      }
+    }
+
+    /** 指令 */
+    class Instructs {
+      constructor() {
+        let i = 0;
+        if (/\:$/.test(arguments[i])) {
+          this.label = arguments[i];
+          i++;
+        }
+        this.oc = arguments[i++];
+        this.destination = arguments[i++];
+        this.source = arguments[i++];
+        if (/^;/.test(arguments[i])) {
+          this.annotation = arguments[i++]
+        }
+      }
+    }
+
+    class Program {
+      constructor() {
+        this.instructs = [];
+        this.RAML128 = []; //可通过直接寻址和间接寻址访问
+        this.RAMH128 = []; //只通过直接寻址访问
+        this.PC = 0;
+        this.OC = {};
+        this.workingRegistersGroup = [];
+        this._initRAML128();
+        this._initSFR();
+        this._initOC();
+      }
+
+      get RSG() {
+        return this.getSFR('PSW').RS1 * 2 + this.getSFR('PSW').RS0 * 1
+      }
+
+      getSFR(name) {
+        return this.RAMH128.find(i => i.name === name) || this.RAMH128[0]
+      }
+
+      _initOC() {
+        let self = this;
+        this.OC = {
+          ['MOV'](d, s) {
+            log(self.getByteUnit(s))
+            if (typeof self.getByteUnit(s).data === 'undefined') {
+              self.getByteUnit(d).data = self.getByteUnit(s);
+            } else {
+              self.getByteUnit(d).data = self.getByteUnit(s).data;
+            }
+          },
+          ['MOVC'](d, s) {
+
+          },
+          ['PUSH'](direct) {
+            self.getSFR('SP').data += 1;
+            self.getSFR('SP').data += direct;
+          },
+          ['POP'](direct) {
+            self.getSFR('SP').data -= direct;
+            self.getSFR('SP').data -= 1;
+          },
+          ['XCH'](d, s) {
+            [self.getByteUnit(d).dat, self.getByteUnit(s).data] = [self.getByteUnit(s).dat, self.getByteUnit(d).data];
+          },
+          ['XCHD'](d) {
+            let byteUnit = self.getByteUnit(d);
+            let H4 = (0x0F & parseInt(byteUnit.data, 16)) / 0x0F;
+            let L4 = 0xF0 & parseInt(byteUnit.data, 16);
+            byteUnit.data = L4 * 0xF + H4 * 0x1
+          },
+          ['ADD'](d, s) {
+            if (d === self.getSFR('A*')) {
+              let d = self.getSFR('A*');
+              let s = self.getByteUnit(s);
+              d.data += s.data
+            }
+          },
+          ['ADDC'](d, s) {
+            if (d === self.getSFR('A*')) {
+              let d = self.getSFR('A*');
+              let s = self.getByteUnit(s);
+              //前7位
+              if ((d.data + s.data) > 0x7f) {
+                self.getSFR('PSW').OV = 1
+
+              }
+              d.data = d.data + s.data;
+            }
+          },
+          ['SUBB'](d, s) {},
+          ['MUL'](d, s) {},
+          ['DIV'](d, s) {},
+          ['INC'](d) {},
+          ['DEC'](d) {},
+          ['DA'](d) {},
+          ['CLR'](d) {},
+          ['CPL'](d) {},
+          ['RL'](d) {},
+          ['RR'](d) {},
+          ['RLC'](d) {},
+          ['RRC'](d) {},
+          ['SWAP'](d) {},
+          ['ANL'](d, s) {},
+          ['ORL'](d, s) {},
+          ['XRL'](d, s) {},
+          ['AJMP'](d, s) {},
+          ['LJMP'](d, s) {},
+          ['SJMP'](d, s) {},
+          ['JMP'](d, s) {},
+          ['NOP'](d, s) {},
+          ['JZ'](d) {},
+          ['JNZ'](d) {},
+          ['CJNE'](d, s, rel) {},
+          ['DJNZ'](d, s, rel) {},
+          ['ACALL'](d, s, rel) {},
+          ['LCALL'](d, s, rel) {},
+          ['RET'](d, s, rel) {},
+          ['RETI'](d) {},
+        }
+      }
+
+      _initRAML128() {
+        //初始化工作寄存器(00H-1F)
+        for (let i = 0; i < 4; i++) {
+          this.workingRegistersGroup[i] = []
+          for (let j = 0; j < 8; j++) {
+            this.RAML128.push(new Register(i * 8 + j, 0))
+            this.workingRegistersGroup[i][j] = new Register(i * 8 + j, 0x0);
+          }
+        }
+
+        for (let i = 0x20; i < 0x7F; i++) {
+          this.RAML128.push(new ByteUnit(i, 0))
+        }
+      }
+
+      _initSFR() {
+        this.RAMH128.push(new SFR(0x80, 0, 'P0*')); //p0端口
+        this.RAMH128.push(new SFR(0x81, 0, 'SP')); //堆栈指针
+        this.RAMH128.push(new SFR(0x82, 0, 'DPL')); //数据指针L
+        this.RAMH128.push(new SFR(0x83, 0, 'DPH')); //数据指针H
+        this.RAMH128.push(new SFR(0x87, 0, 'PCON')); //电源控制
+        this.RAMH128.push(new SFR(0x88, 0, 'TCON*')); //定时器控制
+        this.RAMH128.push(new SFR(0x89, 0, 'TMOD')); //定时器模式
+        this.RAMH128.push(new SFR(0x8A, 0, 'TL0')); //T0低字节
+        this.RAMH128.push(new SFR(0x8B, 0, 'TL1')); //T1低字节
+        this.RAMH128.push(new SFR(0x8C, 0, 'TH0')); //T0高字节
+        this.RAMH128.push(new SFR(0x8D, 0, 'TH1')); //T1高字节
+        this.RAMH128.push(new SFR(0x90, 0, 'P1*')); //p1端口
+        this.RAMH128.push(new SFR(0x91, 0, 'SCON*')); //
+        this.RAMH128.push(new PSW(0xD0, 0, 'PSW')); //程序状态字
+        this.RAMH128.push(new SFR(0xE0, 0, 'A*')); //A累加器
+        this.RAMH128.push(new SFR(0xF0, 0, 'B*')); //B寄存器
+      }
+
+
+      loadInstructs(code) {
+        let ret = code.split(' ').map(i => i.split(','));
+        this.instructs.push(new Instructs(...getArray(ret)))
+      }
+
+
+      getByteUnit(s) {
+        const _getbyAddress = (address) => {
+          if (address.length === 1) {
+            address = '0' + address
+          }
+          return this.RAML128.find(i => i.address === address)
+        }
+        const _getByRegisterName = (name) => {
+          if (name === 'A') {
+            return this.getSFR('A*');
+          };
+          if (name === 'B') {
+            return this.getSFR('B*');
+          };
+          return this.workingRegistersGroup[this.RSG][parseInt(name.replace(/R/, ''), 16)]
+        }
+
+        if (/@[R,A,B]\+/.test(s)) { //变址寻址
+        } else if (/@[R,A,B]/.test(s)) { //寄存器间接寻址
+          let register = _getByRegisterName(s.replace(/@/, ''));
+          let ByteUnit = _getbyAddress(register.data);
+          return ByteUnit;
+        } else if (/[R,A,B]/.test(s)) { //寄存器寻址
+          let register = _getByRegisterName(s);
+          return register;
+        } else if (/^#[0-9-a-f-A-F]/.test(s)) { //立即数寻址
+          return s.replace(/#/, '').replace(/H/, '');
+        } else if (/[0-9-a-f-A-F]/.test(s)) { //直接寻址
+          let ByteUnit = _getbyAddress(s.replace(/H/, ''));
+          return ByteUnit;
+        } else {}
+      }
+
+      next() {
+        if (this.PC === this.instructs.length) {
+          return false;
+        }
+        return this.instructs[this.PC++];
+      }
+
+      goto(label) {
+        label = typeof parseInt(label);
+        if (typeof label !== 'number') {
+          return false;
+        }
+        if (label >= 0 && label <= this.instructs.length) {
+          return false;
+        }
+        this.PC = label;
+        return this.instructs[this.PC];
+      }
+
+      print() {
+        console.table(this.workingRegistersGroup[0]);
+        console.table(this.RAML128);
+        console.table(this.RAMH128);
+      }
+
+      parse(instructs) {
+        try {
+          if (!instructs.oc) {
+            return
+          }
+          log('d->', instructs.destination, 's->', instructs.source)
+          this.OC[instructs.oc.toUpperCase()](instructs.destination, instructs.source);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    }
+
+
+    function getArray(array) {
+      let ret = [];
+      (function get(array) {
+        array.forEach(i => {
+          if (i instanceof Array) {
+            get(i);
+          } else if (i !== '') {
+            ret.push(i);
+          }
+        })
+      })(array)
+      return ret;
+    }
+  </script>
+
+  <script>
+    /* 运行 */
+    const run = () => {
+      const program = new Program();
+      document
+        .querySelector('textarea')
+        .value
+        .split('\n')
+        .forEach((code, index, self) => {
+          program.loadInstructs(code);
+        })
+
+      const clock = setInterval(() => {
+        let instructs = program.next();
+        program.parse(instructs);
+        if (instructs) {
+
+        } else {
+          clearInterval(clock);
+          program.print();
+        }
+      }, 250)
+    }
+  </script>
+</body>
+
+</html>
+<!--
+  格式：指令 目标 源
+
+
+MOV R0,#32H
+MOV A,#48H
+MOV 32H,#80H
+MOV 40H,08H
+
+MOV A,@R0
+MOV @R0,40H
+MOV 40H,A
+MOV R0,#35
+-->

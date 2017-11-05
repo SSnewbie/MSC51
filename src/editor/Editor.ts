@@ -39,7 +39,17 @@ export default class Editor {
 			if (e.code === 'Enter') {
 				this.codeContent.linefeed(this.selectionRow, this.selectionLine);
 				this.selectionRow += 1;
+				this.selectionLine = 0;
 			} else if (e.code === 'Backspace') {
+				this.codeContent.delete(this.selectionRow, this.selectionLine);
+				if (this.selectionLine <= 0) {
+					if (this.selectionRow > 0) {
+						this.selectionRow -= 1;
+						this.selectionLine = this.codeContent.getContent[this.selectionRow].text.length;
+					}
+				} else {
+					this.selectionLine -= 1;
+				}
 			} else if (e.code === 'ArrowUp') {
 				if (this.selectionRow > 0) {
 					this.selectionRow -= 1;
@@ -76,7 +86,7 @@ export default class Editor {
 		const y = e.layerY;
 
 		this.selectionRow = Math.floor(y / config.fontSize);
-		if (this.codeContent.getContent.length-2 < this.selectionRow ) {
+		if (this.codeContent.getContent.length - 2 < this.selectionRow) {
 			this.selectionRow = this.codeContent.getContent.length - 2;
 		}
 		let viewlineLength = this.codeContent.getContent[this.selectionRow].text.length;
