@@ -117,35 +117,44 @@
     // }
   </script>
   <script>
+    /*
+     * 
+     */
     class ByteUnit {
       constructor(address, data) {
-        this._address = address.toString(16);
-        this._data = data.toString(16);
-        Register.count++;
+        this._address = address;
+        this._data = data;
       }
       set address(val) {
+        if (/\d+H/.test) {
+          val = parseInt(val, 16);
+        }
         if (val > 0xFF) {
-          this._address = `${val % 0XFF}`.toString(16);
+          this._address = val % 0XFF;
           return true;
         } else if (val < 0x0) {
           this._address = 0;
         }
-        this._address = val.toString(16);
+        this._address = val;
       }
       get address() {
-        return this._address.length == 2 ? this._address : '0' + this._address;
+        return '0'.repeat(2 - this._address.toString(16).length) + this._address.toString(16);
       }
       set data(val) {
+        if (/\d+H/.test(val)) {
+          log('!!')
+          val = parseInt(val, 16);
+        }
         if (val > 0xFF) {
-          this._data = `${val % 0xFF}`.toString(16);
+          this._data = val % 0XFF;
           return true;
         } else if (val < 0x0) {
-          this._data = `${0xFF}`.toString(16);
+          this._data = 0;
         }
-        this._data = val.toString(16);
+        this._data = val;
       }
       get data() {
-        return this._data.length == 2 ? this._data : '0' + this._data;
+        return '0'.repeat(2 - this._data.toString(16).length) + this._data.toString(16);
       }
 
 
@@ -163,6 +172,26 @@
             this._data = parseInt(this._data, 16) ^ Math.pow(2, n);
           }
         }
+      }
+    }
+
+    class ByteUnitX extends ByteUnit {
+      constructor(address, data) {
+        super(address, data);
+      }
+
+      set address(val) {
+        if (val > 0xFFFF) {
+          this._address = `${val % 0XFFFF}`.toString(16);
+          return true;
+        } else if (val < 0x0) {
+          this._address = 0;
+        }
+        this._address = val.toString(16);
+      }
+
+      get address() {
+        return '0'.repeat(4 - this._address.length) + a;
       }
     }
 
@@ -256,12 +285,14 @@
         this.instructs = [];
         this.RAML128 = []; //可通过直接寻址和间接寻址访问
         this.RAMH128 = []; //只通过直接寻址访问
+        this.RAMX = [];
         this.PC = 0;
         this.OC = {};
         this.workingRegistersGroup = [];
         this._initRAML128();
         this._initSFR();
         this._initOC();
+        this._initROMX();
       }
 
       get RSG() {
@@ -275,11 +306,11 @@
       _initOC() {
         let self = this;
         this.OC = {
-          ['MOV'](d, s) {
-            log(self.getByteUnit(s))
+          ['MOV'](d, s) { //sucess
             if (typeof self.getByteUnit(s).data === 'undefined') {
               self.getByteUnit(d).data = self.getByteUnit(s);
             } else {
+
               self.getByteUnit(d).data = self.getByteUnit(s).data;
             }
           },
@@ -295,19 +326,22 @@
             self.getSFR('SP').data -= 1;
           },
           ['XCH'](d, s) {
-            [self.getByteUnit(d).dat, self.getByteUnit(s).data] = [self.getByteUnit(s).dat, self.getByteUnit(d).data];
+            [self.getByteUnit(d).data, self.getByteUnit(s).data] = [self.getByteUnit(s).dat, self.getByteUnit(d).data];
           },
-          ['XCHD'](d) {
-            let byteUnit = self.getByteUnit(d);
+          //TODO :有的指令只能操作A
+          ['XCHD'](d, s) {
+            let A = self.getSFR('A*');
+            let byteUnit = self.getByteUnit(s);
             let H4 = (0x0F & parseInt(byteUnit.data, 16)) / 0x0F;
             let L4 = 0xF0 & parseInt(byteUnit.data, 16);
             byteUnit.data = L4 * 0xF + H4 * 0x1
           },
           ['ADD'](d, s) {
-            if (d === self.getSFR('A*')) {
-              let d = self.getSFR('A*');
-              let s = self.getByteUnit(s);
-              d.data += s.data
+            let A = self.getSFR('A*');
+            if (self.getByteUnit(s).data === undefined || self.getByteUnit(s).data === undefined) {
+              A.data += self.getByteUnit(s);
+            } else {
+              A.data += self.getByteUnit(s).data;
             }
           },
           ['ADDC'](d, s) {
@@ -322,19 +356,40 @@
               d.data = d.data + s.data;
             }
           },
-          ['SUBB'](d, s) {},
+          ['SUBB'](d, s) {
+
+          },
           ['MUL'](d, s) {},
           ['DIV'](d, s) {},
-          ['INC'](d) {},
-          ['DEC'](d) {},
-          ['DA'](d) {},
-          ['CLR'](d) {},
-          ['CPL'](d) {},
-          ['RL'](d) {},
-          ['RR'](d) {},
+          ['INC'](d) {
+            self.getByteUnit(d).data += 1;
+          },
+          ['DEC'](d) {
+            self.getByteUnit(d).data -= 1;
+          },
+          ['DA'](d) {
+
+          },
+          ['CLR'](d) {
+            self.getSFR('A*').data = 0;
+          },
+          ['CPL'](d) {
+            self.getSFR('A*').data = ~self.getSFR('A').data;
+          },
+          ['RL'](d) {
+            self.getSFR('A*').data = self.getSFR('A') << 7 ^ self.getSFR('A*').data >> 1
+          },
+          ['RR'](d) {
+            self.getSFR('A*').data = self.getSFR('A') >> 7 ^ self.getSFR('A*').data << 1
+          },
           ['RLC'](d) {},
           ['RRC'](d) {},
-          ['SWAP'](d) {},
+          ['SWAP'](d) { //sucess
+            let A = self.getSFR('A*');
+            let H4 = (0xF0 & parseInt(A.data, 16)) / 16;
+            let L4 = 0x0F & parseInt(A.data, 16);
+            self.getSFR('A*').data = L4 + '' + H4 + 'H';
+          },
           ['ANL'](d, s) {},
           ['ORL'](d, s) {},
           ['XRL'](d, s) {},
@@ -360,7 +415,7 @@
           this.workingRegistersGroup[i] = []
           for (let j = 0; j < 8; j++) {
             this.RAML128.push(new Register(i * 8 + j, 0))
-            this.workingRegistersGroup[i][j] = new Register(i * 8 + j, 0x0);
+            this.workingRegistersGroup[i][j] = new Register(i * 8 + j, 0x0, 'R' + j);
           }
         }
 
@@ -369,6 +424,9 @@
         }
       }
 
+      /**
+       * 初始化特殊功能寄存器
+       **/
       _initSFR() {
         this.RAMH128.push(new SFR(0x80, 0, 'P0*')); //p0端口
         this.RAMH128.push(new SFR(0x81, 0, 'SP')); //堆栈指针
@@ -388,6 +446,11 @@
         this.RAMH128.push(new SFR(0xF0, 0, 'B*')); //B寄存器
       }
 
+      _initROMX() {
+        for (let i = 0; i++; i < 0xFFFF) {
+          this.RAMX.push(new ByteUnitX(i, 0));
+        }
+      }
 
       loadInstructs(code) {
         let ret = code.split(' ').map(i => i.split(','));
@@ -395,11 +458,16 @@
       }
 
 
+      /*
+       * return [Number]or[ByteUnit]
+       */
       getByteUnit(s) {
         const _getbyAddress = (address) => {
-          if (address.length === 1) {
-            address = '0' + address
+          if (/H/.test(address)) {
+            address = address.replace('H', '')
           }
+          address = address.toString(16);
+          address = '0'.repeat(2 - address.length) + address;
           return this.RAML128.find(i => i.address === address)
         }
         const _getByRegisterName = (name) => {
@@ -411,19 +479,18 @@
           };
           return this.workingRegistersGroup[this.RSG][parseInt(name.replace(/R/, ''), 16)]
         }
-
         if (/@[R,A,B]\+/.test(s)) { //变址寻址
-        } else if (/@[R,A,B]/.test(s)) { //寄存器间接寻址
+        } else if (/^@[R,A,B]/.test(s)) { //寄存器间接寻址
           let register = _getByRegisterName(s.replace(/@/, ''));
-          let ByteUnit = _getbyAddress(register.data);
+          let ByteUnit = _getbyAddress(register.data + 'H');
           return ByteUnit;
-        } else if (/[R,A,B]/.test(s)) { //寄存器寻址
+        } else if (/^[R,A,B]/.test(s)) { //寄存器寻址
           let register = _getByRegisterName(s);
           return register;
-        } else if (/^#[0-9-a-f-A-F]/.test(s)) { //立即数寻址
-          return s.replace(/#/, '').replace(/H/, '');
-        } else if (/[0-9-a-f-A-F]/.test(s)) { //直接寻址
-          let ByteUnit = _getbyAddress(s.replace(/H/, ''));
+        } else if (/^#[0-9a-fA-F]/.test(s)) { //立即数寻址
+          return /H$/.test(s) ? parseInt(s.replace(/#/, ''), 16) : parseInt(s.replace(/#/, ''));
+        } else if (/[0-9a-fA-F]/.test(s)) { //直接寻址
+          let ByteUnit = _getbyAddress(s);
           return ByteUnit;
         } else {}
       }
@@ -448,9 +515,32 @@
       }
 
       print() {
-        console.table(this.workingRegistersGroup[0]);
-        console.table(this.RAML128);
-        console.table(this.RAMH128);
+        let workingRegistersGroup = [];
+        let RAML128 = [];
+        let RAMH128 = [];
+        this.workingRegistersGroup[0].forEach(v => workingRegistersGroup.push({
+          address: v.address,
+          data: v.data,
+          name: v.name
+        }))
+
+        this.RAML128.forEach(v => v.data != 0 ? RAML128.push({
+          address: v.address,
+          data: v.data
+        }) : null)
+
+
+        this.RAMH128.forEach(v => RAMH128.push({
+          address: v.address,
+          data: v.data,
+          name: v.name
+        }))
+
+        
+
+        console.table(workingRegistersGroup);
+        console.table(RAML128);
+        console.table(RAMH128);
       }
 
       parse(instructs) {
