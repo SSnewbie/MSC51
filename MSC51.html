@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: "Consolas"!important;
     }
     
     html,
@@ -25,7 +26,7 @@
       display: flex;
       width: 100%;
       height: 100%;
-      min-width: 999px;
+      min-width: 600px;
       margin: 10px auto;
     }
     
@@ -33,12 +34,44 @@
       flex: 233px 0 0;
       height: 100%;
       background: #21252b;
+      color: #bba;
+      font-size: 18px;
+    }
+    
+    .data-wrapper h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #81858b;
+      text-align: center;
+      line-height: 30px;
+      border-bottom: 1px solid #31353b;
+      margin-top: 10px;
+    }
+    
+    .data-wrapper .list {
+      line-height: 20px;
+    }
+    
+    .data-wrapper .list .item {
+      display: flex;
+    }
+    
+    .data-wrapper .list .item .name {
+      flex: 1;
+      height: 23px;
+      text-align: right;
+      padding-right: 25px;
+    }
+    
+    .data-wrapper .list .item .data {
+      flex: 1;
+      height: 23px;
+      text-align: left;
     }
     
     .editor-wrapper {
       flex: 1;
       height: 100%;
-      font-family: "Consolas"!important;
       color: #ff0;
     }
     
@@ -79,43 +112,190 @@
       box-shadow: none;
       outline: none
     }
+    
+    @keyframes flash {
+      from {
+        color: #bba;
+        text-shadow: 0;
+      }
+      to {
+        color: #FFF;
+        text-shadow: 0 0 1px #DDD, 0px 0px 2px #FFF, 0 0 10px #FFF;
+      }
+    }
+    
+    .luminous {
+      animation: flash 3s infinite alternate;
+    }
+  </style>
+
+  <style>
+
   </style>
 </head>
 
 <body>
   <div class="app">
-    <div class="data-wrapper"></div>
+    <div class="data-wrapper">
+      <div class="work_register-group">
+        <h3>工作寄存器组</h3>
+        <ul class="list">
+          <li class="item">
+            <p class="name">R0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R2:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R3:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R4:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R5:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R6:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R7:</p>
+            <p class="data">0</p>
+          </li>
+        </ul>
+      </div>
+      <div class="SRF">
+        <h3>特殊功能寄存器</h3>
+        <ul class="list">
+          <li class="item">
+            <p class="name">P0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">SP:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">DPL:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">DPH:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">PCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TL0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TL1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TH0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TH1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">P1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">SCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">PS:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">A*:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">B*:</p>
+            <p class="data">0</p>
+          </li>
+        </ul>
+      </div>
+      <div class="RAM">
+        <h3>RAM</h3>
+        <ul></ul>
+      </div>
+    </div>
     <div class="editor-wrapper">
       <div class="editor-container">
         <div class="top-contorl">
           <button onclick="run()"> 运行 </button>
         </div>
-        <textarea wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
-        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
+        <textarea wrap="off" placeholder="QWQ" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-lable="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
+        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-lable="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
       </div>
     </div>
   </div>
 
   <script>
-    const log = console.log;
 
-    // const getValue = (program, s) => {
-    //   if (/@[R,A,B][0-7]\+/.test(s)) { //变址寻址
-    //   } else if (/@[R,A,B][0-7]/.test(s)) { //寄存器间接寻址
-    //     let address = program.workingRegistersGroup[program.RSG][parseInt(s.replace(/R/, ''), 16)].data;
-    //     let result = program.workingRegistersGroup[program.RSG][address.data].data;
-    //     console.log(result)
-    //   } else if (/[R,A,B][0-7]/.test(s)) { //寄存器寻址
-    //     let result = program.workingRegistersGroup[program.RSG][parseInt(s.replace(/R/, ''), 16)];
-    //     return result ? program.workingRegistersGroup[program.RSG][result.data].data : 0;
-    //   } else if (/^#[0-9-a-f-A-F]/.test(s)) { //立即数寻址
-    //     return parseInt(s.replace('#', ''), 16);
-    //   } else if (/[0-9-a-f-A-F]/.test(s)) { //直接寻址
-    //     let result = program.workingRegistersGroup[program.RSG].find(i => i.address === parseInt(s, 16))
-    //     return result ? result.data : 0
-    //   } else {}
-    // }
+DEFAULT_CODE= `ORG 0000H 
+LJMP START 
+ORG 0030H 
+START: MOV A,#0AAH 
+`
+
+    const DEV = true;
+    // const DEV = false;
+    const log = DEV ? console.log : fun = () => {};
+
+    function setData(name, data) {
+      let element = document.querySelector('[data-name="' + name + '"]');
+      if (!element) {
+        return Error('element not found')
+      };
+      element.parentElement.classList.add('luminous');
+      setTimeout(() => {
+        element.parentElement.classList.remove('luminous');
+      }, 6000)
+      element.innerHTML = data || 0;
+    }
+
+    class History {
+      constructor() {
+        localStorage.code = [];
+        this.code = localStorage.getItem('code');
+      }
+      pushCode(item) {
+        this.code.push(item);
+      }
+
+      getCode() {
+        return this.code[this.code.length - 1]
+      }
+
+    }
   </script>
+
+
   <script>
     /*
      * 
@@ -125,6 +305,7 @@
         this._address = address;
         this._data = data;
       }
+
       set address(val) {
         if (/\d+H/.test) {
           val = parseInt(val, 16);
@@ -137,12 +318,14 @@
         }
         this._address = val;
       }
+
       get address() {
         return '0'.repeat(2 - this._address.toString(16).length) + this._address.toString(16);
       }
+
       set data(val) {
+        console.assert(!isNaN(val), val);
         if (/\d+H/.test(val)) {
-          log('!!')
           val = parseInt(val, 16);
         }
         if (val > 0xFF) {
@@ -152,8 +335,13 @@
           this._data = 0;
         }
         this._data = val;
+        if (this.name) {
+          setData(this.name, val);
+        }
       }
+
       get data() {
+        console.assert(2 - this._data.toString(16).length >= 0, 2 - this._data.toString(16).length, this._data, this._data.toString(16));
         return '0'.repeat(2 - this._data.toString(16).length) + this._data.toString(16);
       }
 
@@ -214,10 +402,6 @@
         super(address, data, name);
       }
 
-      get XXOO() {
-        return 'XX00'
-      }
-
       get P() {
         return this.getBit(0)
       }
@@ -268,7 +452,7 @@
       constructor() {
         let i = 0;
         if (/\:$/.test(arguments[i])) {
-          this.label = arguments[i];
+          this.lable = arguments[i];
           i++;
         }
         this.oc = arguments[i++];
@@ -277,17 +461,24 @@
         if (/^;/.test(arguments[i])) {
           this.annotation = arguments[i++]
         }
+        this.id = Instructs.count++;
+
       }
     }
+    Instructs.count = 0;
+
+
 
     class Program {
       constructor() {
-        this.instructs = [];
+        this.instructs = []; //存放指令（应该是ROM，但是.....不想写了，ROM写在正式版里）
         this.RAML128 = []; //可通过直接寻址和间接寻址访问
         this.RAMH128 = []; //只通过直接寻址访问
-        this.RAMX = [];
-        this.PC = 0;
-        this.OC = {};
+        this.RAMX = []; //外部RAM
+        this.PC = 0; //PC指针
+        this.OC = {}; //指令集
+        this.RAM = {} // 
+        this.lables = [];
         this.workingRegistersGroup = [];
         this._initRAML128();
         this._initSFR();
@@ -303,14 +494,25 @@
         return this.RAMH128.find(i => i.name === name) || this.RAMH128[0]
       }
 
+      _getValueToInt(s) {
+        if (typeof self.getByteUnit(s).data === 'undefined') {
+          return parseInt(self.getByteUnit(s));
+        } else {
+          return parseInt(self.getByteUnit(s).data);
+        }
+      }
+
       _initOC() {
         let self = this;
         this.OC = {
+          ['ORG'](d) {
+            self.PC = parseInt(d);
+          },
           ['MOV'](d, s) { //sucess
+            log(s, self.getByteUnit(s));
             if (typeof self.getByteUnit(s).data === 'undefined') {
               self.getByteUnit(d).data = self.getByteUnit(s);
             } else {
-
               self.getByteUnit(d).data = self.getByteUnit(s).data;
             }
           },
@@ -334,15 +536,19 @@
             let byteUnit = self.getByteUnit(s);
             let H4 = (0x0F & parseInt(byteUnit.data, 16)) / 0x0F;
             let L4 = 0xF0 & parseInt(byteUnit.data, 16);
+            7
             byteUnit.data = L4 * 0xF + H4 * 0x1
           },
           ['ADD'](d, s) {
             let A = self.getSFR('A*');
-            if (self.getByteUnit(s).data === undefined || self.getByteUnit(s).data === undefined) {
-              A.data += self.getByteUnit(s);
+            var a = parseInt(A.data, 16);
+            var b = 0;
+            if (typeof self.getByteUnit(s) === 'number') {
+              b = parseInt(self.getByteUnit(s));
             } else {
-              A.data += self.getByteUnit(s).data;
+              b = parseInt(self.getByteUnit(s).data);
             }
+            A.data = a + b;
           },
           ['ADDC'](d, s) {
             if (d === self.getSFR('A*')) {
@@ -394,7 +600,12 @@
           ['ORL'](d, s) {},
           ['XRL'](d, s) {},
           ['AJMP'](d, s) {},
-          ['LJMP'](d, s) {},
+          ['LJMP'](d) {
+            let id = self.lable.find(v => v.name = d);
+            if (!id) {
+              console.error('lable not fond')
+            };
+          },
           ['SJMP'](d, s) {},
           ['JMP'](d, s) {},
           ['NOP'](d, s) {},
@@ -403,7 +614,9 @@
           ['CJNE'](d, s, rel) {},
           ['DJNZ'](d, s, rel) {},
           ['ACALL'](d, s, rel) {},
-          ['LCALL'](d, s, rel) {},
+          ['LCALL'](d, s, rel) {
+
+          },
           ['RET'](d, s, rel) {},
           ['RETI'](d) {},
         }
@@ -454,7 +667,14 @@
 
       loadInstructs(code) {
         let ret = code.split(' ').map(i => i.split(','));
-        this.instructs.push(new Instructs(...getArray(ret)))
+        let instructs = new Instructs(...getArray(ret));
+        this.instructs.push(instructs);
+        if (instructs.lable) {
+          this.lables.push({
+            id: instructs.id,
+            lable: instructs.lable
+          });
+        }
       }
 
 
@@ -502,15 +722,15 @@
         return this.instructs[this.PC++];
       }
 
-      goto(label) {
-        label = typeof parseInt(label);
-        if (typeof label !== 'number') {
+      goto(lable) {
+        lable = typeof parseInt(lable);
+        if (typeof lable !== 'number') {
           return false;
         }
-        if (label >= 0 && label <= this.instructs.length) {
+        if (lable >= 0 && lable <= this.instructs.length) {
           return false;
         }
-        this.PC = label;
+        this.PC = lable;
         return this.instructs[this.PC];
       }
 
@@ -535,12 +755,9 @@
           data: v.data,
           name: v.name
         }))
-
-        
-
-        console.table(workingRegistersGroup);
-        console.table(RAML128);
-        console.table(RAMH128);
+        if (RAML128) {
+          console.table(RAML128);
+        }
       }
 
       parse(instructs) {
@@ -551,7 +768,7 @@
           log('d->', instructs.destination, 's->', instructs.source)
           this.OC[instructs.oc.toUpperCase()](instructs.destination, instructs.source);
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
     }
@@ -572,7 +789,22 @@
     }
   </script>
 
+
+  <!-- 执行部分 -->
   <script>
+    document
+      .querySelector('textarea')
+      .value = DEFAULT_CODE;
+
+    /* 初始化历史记录器*/
+    const history = new History();
+    /* 初始化DOM */
+    (() => {
+      document.querySelectorAll('.list .item').forEach(element => {
+        let name = element.querySelector('.name').innerHTML.replace(':', '');
+        element.querySelector('.data').setAttribute('data-name', name);
+      })
+    })()
     /* 运行 */
     const run = () => {
       const program = new Program();
@@ -586,9 +818,8 @@
 
       const clock = setInterval(() => {
         let instructs = program.next();
-        program.parse(instructs);
         if (instructs) {
-
+          let result = program.parse(instructs);
         } else {
           clearInterval(clock);
           program.print();
