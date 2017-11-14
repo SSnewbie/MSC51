@@ -226,7 +226,7 @@
             <p class="data">0</p>
           </li>
           <li class="item">
-            <p class="name">PS:</p>
+            <p class="name">PSW:</p>
             <p class="data">0</p>
           </li>
           <li class="item">
@@ -256,13 +256,18 @@
   </div>
 
   <script>
-
-DEFAULT_CODE= `ORG 0000H 
+    DEFAULT_CODE = `ORG 0000H 
 LJMP START 
 ORG 0030H 
 START: MOV A,#0AAH 
+LJMP MMP
+MOV R1,#12H
+MOV R2,#12H
+MOV R3,#12H
+MOV R4,#12H
+MMP: MOV R5,#34
 `
-
+const FREQUENC =1500;
     const DEV = true;
     // const DEV = false;
     const log = DEV ? console.log : fun = () => {};
@@ -324,7 +329,6 @@ START: MOV A,#0AAH
       }
 
       set data(val) {
-        console.assert(!isNaN(val), val);
         if (/\d+H/.test(val)) {
           val = parseInt(val, 16);
         }
@@ -336,7 +340,7 @@ START: MOV A,#0AAH
         }
         this._data = val;
         if (this.name) {
-          setData(this.name, val);
+          setData(this.name, val.toString(16));
         }
       }
 
@@ -462,7 +466,6 @@ START: MOV A,#0AAH
           this.annotation = arguments[i++]
         }
         this.id = Instructs.count++;
-
       }
     }
     Instructs.count = 0;
@@ -477,8 +480,8 @@ START: MOV A,#0AAH
         this.RAMX = []; //外部RAM
         this.PC = 0; //PC指针
         this.OC = {}; //指令集
-        this.RAM = {} // 
-        this.lables = [];
+        this.RAM = {} //暂留 
+        this.lables = []; //保存长跳转的位置表
         this.workingRegistersGroup = [];
         this._initRAML128();
         this._initSFR();
@@ -506,7 +509,7 @@ START: MOV A,#0AAH
         let self = this;
         this.OC = {
           ['ORG'](d) {
-            self.PC = parseInt(d);
+
           },
           ['MOV'](d, s) { //sucess
             log(s, self.getByteUnit(s));
@@ -601,7 +604,8 @@ START: MOV A,#0AAH
           ['XRL'](d, s) {},
           ['AJMP'](d, s) {},
           ['LJMP'](d) {
-            let id = self.lable.find(v => v.name = d);
+            let id = self.lables.find(v => v.lable.replace(':','') === d).id;
+            self.goto(id);
             if (!id) {
               console.error('lable not fond')
             };
@@ -723,18 +727,18 @@ START: MOV A,#0AAH
       }
 
       goto(lable) {
-        lable = typeof parseInt(lable);
+        lable = parseInt(lable);
         if (typeof lable !== 'number') {
           return false;
         }
-        if (lable >= 0 && lable <= this.instructs.length) {
+        if (lable <= 0 && lable >= this.instructs.length) {
           return false;
         }
         this.PC = lable;
-        return this.instructs[this.PC];
       }
 
       print() {
+        
         let workingRegistersGroup = [];
         let RAML128 = [];
         let RAMH128 = [];
@@ -765,7 +769,7 @@ START: MOV A,#0AAH
           if (!instructs.oc) {
             return
           }
-          log('d->', instructs.destination, 's->', instructs.source)
+          log('PC->', this.PC-1, 'd->', instructs.destination, 's->', instructs.source)
           this.OC[instructs.oc.toUpperCase()](instructs.destination, instructs.source);
         } catch (e) {
           console.error(e);
@@ -808,6 +812,7 @@ START: MOV A,#0AAH
     /* 运行 */
     const run = () => {
       const program = new Program();
+      Instructs.count = 0;
       document
         .querySelector('textarea')
         .value
@@ -815,16 +820,15 @@ START: MOV A,#0AAH
         .forEach((code, index, self) => {
           program.loadInstructs(code);
         })
-
       const clock = setInterval(() => {
-        let instructs = program.next();
+          let instructs = program.next();
         if (instructs) {
           let result = program.parse(instructs);
         } else {
           clearInterval(clock);
           program.print();
         }
-      }, 250)
+      }, FREQUENC)
     }
   </script>
 </body>
