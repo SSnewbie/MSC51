@@ -256,18 +256,13 @@
   </div>
 
   <script>
-    DEFAULT_CODE = `ORG 0000H 
-LJMP START 
-ORG 0030H 
-START: MOV A,#0AAH 
-LJMP MMP
-MOV R1,#12H
-MOV R2,#12H
-MOV R3,#12H
-MOV R4,#12H
-MMP: MOV R5,#34
+    DEFAULT_CODE = `MOV A,#1H
+MOV B,#2H
+CJNE A,B,C
+MOV R0,#1H
+C: MOV R0,#1H
 `
-const FREQUENC =1500;
+    const FREQUENC = 150;
     const DEV = true;
     // const DEV = false;
     const log = DEV ? console.log : fun = () => {};
@@ -352,7 +347,7 @@ const FREQUENC =1500;
 
       getBit(n) {
         if (n >= 0 && n < 8) {
-          return (parseInt(this._data, 16) >> n & 1) != 'undefined' ? (parseInt(this._data, 16) >> n & 1) : 0;
+          return (parseInt(this.data, 16) >> n & 1) != 'undefined' ? (parseInt(this.data, 16) >> n & 1) : 0;
         }
       }
 
@@ -364,6 +359,7 @@ const FREQUENC =1500;
             this._data = parseInt(this._data, 16) ^ Math.pow(2, n);
           }
         }
+        setData(this.name, this.data.toString(16));
       }
     }
 
@@ -428,25 +424,25 @@ const FREQUENC =1500;
         return this.getBit(7)
       }
 
-      set P(val) {
+      set P(value) {
         this.setBit(0, value > 0 ? 1 : 0)
       }
-      set OV(val) {
+      set OV(value) {
         this.setBit(2, value > 0 ? 1 : 0)
       }
-      set RS0(val) {
+      set RS0(value) {
         this.setBit(3, value > 0 ? 1 : 0)
       }
-      set RS1(val) {
+      set RS1(value) {
         this.setBit(4, value > 0 ? 1 : 0)
       }
-      set F0(val) {
+      set F0(value) {
         this.setBit(5, value > 0 ? 1 : 0)
       }
-      set AC(val) {
+      set AC(value) {
         this.setBit(6, value > 0 ? 1 : 0)
       }
-      set CY(val) {
+      set CY(value) {
         this.setBit(7, value > 0 ? 1 : 0)
       }
     }
@@ -455,13 +451,19 @@ const FREQUENC =1500;
     class Instructs {
       constructor() {
         let i = 0;
+        //label
         if (/\:$/.test(arguments[i])) {
           this.lable = arguments[i];
           i++;
         }
+        //操作符
         this.oc = arguments[i++];
+
         this.destination = arguments[i++];
         this.source = arguments[i++];
+        if (!/^;/.test(arguments[i])) {
+          this.rel = arguments[i++]
+        }
         if (/^;/.test(arguments[i])) {
           this.annotation = arguments[i++]
         }
@@ -498,10 +500,10 @@ const FREQUENC =1500;
       }
 
       _getValueToInt(s) {
-        if (typeof self.getByteUnit(s).data === 'undefined') {
-          return parseInt(self.getByteUnit(s));
+        if (typeof s.data === 'undefined') {
+          return parseInt(s);
         } else {
-          return parseInt(self.getByteUnit(s).data);
+          return parseInt(s.data);
         }
       }
 
@@ -512,7 +514,6 @@ const FREQUENC =1500;
 
           },
           ['MOV'](d, s) { //sucess
-            log(s, self.getByteUnit(s));
             if (typeof self.getByteUnit(s).data === 'undefined') {
               self.getByteUnit(d).data = self.getByteUnit(s);
             } else {
@@ -539,7 +540,6 @@ const FREQUENC =1500;
             let byteUnit = self.getByteUnit(s);
             let H4 = (0x0F & parseInt(byteUnit.data, 16)) / 0x0F;
             let L4 = 0xF0 & parseInt(byteUnit.data, 16);
-            7
             byteUnit.data = L4 * 0xF + H4 * 0x1
           },
           ['ADD'](d, s) {
@@ -560,13 +560,18 @@ const FREQUENC =1500;
               //前7位
               if ((d.data + s.data) > 0x7f) {
                 self.getSFR('PSW').OV = 1
-
               }
               d.data = d.data + s.data;
             }
           },
           ['SUBB'](d, s) {
-
+            d = self.getSFR('A*');
+            s = self.getByteUnit(s);
+            //前7位
+            if ((d.data - s.data) > 0x7f) {
+              self.getSFR('PSW').OV = 1
+            }
+            d.data = parseInt(d.data) - self._getValueToInt(s);
           },
           ['MUL'](d, s) {},
           ['DIV'](d, s) {},
@@ -602,20 +607,58 @@ const FREQUENC =1500;
           ['ANL'](d, s) {},
           ['ORL'](d, s) {},
           ['XRL'](d, s) {},
-          ['AJMP'](d, s) {},
-          ['LJMP'](d) {
-            let id = self.lables.find(v => v.lable.replace(':','') === d).id;
-            self.goto(id);
+          ['AJMP'](rel) {
+
+            let id = self.lables.find(v => v.lable.replace(':', '') === rel).id;
             if (!id) {
               console.error('lable not fond')
             };
+            self.goto(id);
           },
-          ['SJMP'](d, s) {},
-          ['JMP'](d, s) {},
+          ['LJMP'](rel) {
+            let id = self.lables.find(v => v.lable.replace(':', '') === rel).id;
+            if (!id) {
+              console.error('lable not fond')
+            };
+            self.goto(id);
+          },
+          ['SJMP'](rel) {
+            let id = self.lables.find(v => v.lable.replace(':', '') === rel).id;
+            if (!id) {
+              console.error('lable not fond')
+            };
+            self.goto(id);
+          },
+          ['JMP'](rel) { //间接转移指令
+            let id = self.lables.find(v => v.lable.replace(':', '') === rel).id;
+            if (!id) {
+              console.error('lable not fond')
+            };
+            self.goto(id);
+          },
           ['NOP'](d, s) {},
-          ['JZ'](d) {},
-          ['JNZ'](d) {},
-          ['CJNE'](d, s, rel) {},
+          ['JZ'](rel) {
+            if (self.getSFR('A*').data == 1) {
+              this.LJMP(rel);
+            }
+          },
+          ['JNZ'](rel) {
+            if (self.getSFR('A*').data == 0) {
+              this.LJMP(rel);
+            }
+          },
+          ['CJNE'](d, s, rel) {
+            d = self._getValueToInt(self.getByteUnit(d));
+            s = self._getValueToInt(self.getByteUnit(s))
+            if (d === s) {
+              return;
+            } else if (d > s) {
+              self.getSFR('PSW').CY = 0;
+            } else if (d < s) {
+              self.getSFR('PSW').CY = 1;
+            }
+            this.LJMP(rel);
+          },
           ['DJNZ'](d, s, rel) {},
           ['ACALL'](d, s, rel) {},
           ['LCALL'](d, s, rel) {
@@ -738,7 +781,7 @@ const FREQUENC =1500;
       }
 
       print() {
-        
+
         let workingRegistersGroup = [];
         let RAML128 = [];
         let RAMH128 = [];
@@ -759,9 +802,11 @@ const FREQUENC =1500;
           data: v.data,
           name: v.name
         }))
-        if (RAML128) {
+
+        if (RAML128,length>0) {
           console.table(RAML128);
         }
+        console.log(this.getSFR('PSW'));
       }
 
       parse(instructs) {
@@ -769,8 +814,8 @@ const FREQUENC =1500;
           if (!instructs.oc) {
             return
           }
-          log('PC->', this.PC-1, 'd->', instructs.destination, 's->', instructs.source)
-          this.OC[instructs.oc.toUpperCase()](instructs.destination, instructs.source);
+          log('PC->', this.PC - 1, 'd->', instructs.destination, 's->', instructs.source)
+          this.OC[instructs.oc.toUpperCase()](instructs.destination, instructs.source, instructs.rel);
         } catch (e) {
           console.error(e);
         }
@@ -821,7 +866,7 @@ const FREQUENC =1500;
           program.loadInstructs(code);
         })
       const clock = setInterval(() => {
-          let instructs = program.next();
+        let instructs = program.next();
         if (instructs) {
           let result = program.parse(instructs);
         } else {

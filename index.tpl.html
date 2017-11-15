@@ -7,12 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>MSC51</title>
   <style>
-    /**  **/
-    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: "Consolas"!important;
     }
     
     html,
@@ -27,7 +26,7 @@
       display: flex;
       width: 100%;
       height: 100%;
-      min-width: 999px;
+      min-width: 600px;
       margin: 10px auto;
     }
     
@@ -35,12 +34,44 @@
       flex: 233px 0 0;
       height: 100%;
       background: #21252b;
+      color: #bba;
+      font-size: 18px;
+    }
+    
+    .data-wrapper h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #81858b;
+      text-align: center;
+      line-height: 30px;
+      border-bottom: 1px solid #31353b;
+      margin-top: 10px;
+    }
+    
+    .data-wrapper .list {
+      line-height: 20px;
+    }
+    
+    .data-wrapper .list .item {
+      display: flex;
+    }
+    
+    .data-wrapper .list .item .name {
+      flex: 1;
+      height: 23px;
+      text-align: right;
+      padding-right: 25px;
+    }
+    
+    .data-wrapper .list .item .data {
+      flex: 1;
+      height: 23px;
+      text-align: left;
     }
     
     .editor-wrapper {
       flex: 1;
       height: 100%;
-      font-family: "Consolas"!important;
       color: #ff0;
     }
     
@@ -51,42 +82,22 @@
       cursor: text;
     }
     
-
-
-
-    .editor-container .view-line {
-      line-height: 30px;
+    .top-contorl {
+      position: absolute;
+      right: 20px;
     }
     
-    .inputarea {
-      position: absolute;
-      display: block;
-      width: 3px!important;
-      height: 30px;
-      outline: none!important;
-      resize: none;
-      border: none;
-      color: rgb(107, 193, 243);
-      background-color: transparent;
-      font-size: 20px;
-    }
-    
-
-    .top-contorl{
-      position: absolute;
-      right:20px;
-    }
-    .top-contorl button{
-      color:aliceblue;
+    .top-contorl button {
+      color: aliceblue;
       background: transparent;
       border: none;
       font-size: 18px;
     }
-
+    
     textarea {
       position: absolute;
-      top:20px;
-      left:20px;
+      top: 20px;
+      left: 20px;
       width: 100%;
       height: 100%;
       background: transparent;
@@ -99,7 +110,22 @@
     textarea:focus {
       border: none;
       box-shadow: none;
-      outline:none
+      outline: none
+    }
+    
+    @keyframes flash {
+      from {
+        color: #bba;
+        text-shadow: 0;
+      }
+      to {
+        color: #FFF;
+        text-shadow: 0 0 1px #DDD, 0px 0px 2px #FFF, 0 0 10px #FFF;
+      }
+    }
+    
+    .luminous {
+      animation: flash 3s infinite alternate;
     }
   </style>
 </head>
@@ -107,16 +133,120 @@
 <body>
   <div class="app">
     <div class="data-wrapper">
-
+      <div class="work_register-group">
+        <h3>工作寄存器组</h3>
+        <ul class="list">
+          <li class="item">
+            <p class="name">R0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R2:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R3:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R4:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R5:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R6:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">R7:</p>
+            <p class="data">0</p>
+          </li>
+        </ul>
+      </div>
+      <div class="SRF">
+        <h3>特殊功能寄存器</h3>
+        <ul class="list">
+          <li class="item">
+            <p class="name">P0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">SP:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">DPL:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">DPH:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">PCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TL0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TL1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TH0:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">TH1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">P1:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">SCON:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">PSW:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">A*:</p>
+            <p class="data">0</p>
+          </li>
+          <li class="item">
+            <p class="name">B*:</p>
+            <p class="data">0</p>
+          </li>
+        </ul>
+      </div>
+      <div class="RAM">
+        <h3>RAM</h3>
+        <ul></ul>
+      </div>
     </div>
     <div class="editor-wrapper">
       <div class="editor-container">
         <div class="top-contorl">
-          <button> 运行 </button>
+          <button onclick="run()"> 运行 </button>
         </div>
-        <div class="presentation" role="presentation"></div>
-        <textarea wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
-        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
+        <textarea wrap="off" placeholder="QWQ" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-lable="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></textarea>
+        <!-- <input data-mprt="6" class="inputarea" wrap="off" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" aria-lable="现在无法访问编辑器。按 Alt+F1  显示选项。" role="textbox" aria-multiline="true" aria-haspopup="false" aria-autocomplete="both"></input> -->
       </div>
     </div>
   </div>

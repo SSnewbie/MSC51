@@ -1,24 +1,26 @@
 import RAM from './RAM';
-import ROM from './ROM';
+import ROM from './ROM/ROM';
+import Instructs from './Instructs';
+import ACTable from './actionCodeTable';
+import parser from './Parser';
 
-class MAC51 {
-	private ram: RAM;
+export default class MAC51 {
 	private rom: ROM;
-	constructor(ram: RAM, rom: ROM) {
-		this.ram = ram;
-		this.rom = rom;
+	public ram: RAM;
+	private parser: Function;
+	private instructsList: Array<Instructs>;
+	constructor() {
+		this.ram = new RAM();
+		this.rom = new ROM();
+		this.instructsList = new Array<Instructs>();
 	}
 
-	private static compile(code: string): void {
-		let codes = code.split('\n');
-		
+	public loadInstructs(code: string) {
+		code.split('\n').forEach(i => this.instructsList.push(new Instructs(i)));
 	}
 
-	public run(code: string): void {
-		//todo 1: 将程序写入ROM 
-
-
-		//todo 2: 
+	public run() {
+		parser.call(this.ram, this.instructsList[0])
 	}
 
 

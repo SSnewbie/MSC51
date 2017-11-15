@@ -2,7 +2,6 @@ const log = console.log;
 import config from './config';
 import CodeContent from './CodeContent';
 export default class Editor {
-
 	private selectionRow: number;
 	private selectionLine: number;
 	private codeContent: CodeContent;
@@ -76,7 +75,6 @@ export default class Editor {
 			}
 			this.updataCuoserLocation();
 		})
-
 		this.codeContent.loadCode(this.element)
 	}
 
